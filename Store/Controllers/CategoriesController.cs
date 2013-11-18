@@ -106,12 +106,26 @@ namespace Store.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             Category category = db.Categories.Find(id);
-            Product product = db.Products.
-                Where(p => p.Category.Id.Equals(id)).FirstOrDefault<Product>();
+            if (category== null)
+            {
+                return HttpNotFound();
+            }
 
-            db.Categories.Remove(category);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            var product = db.Products.Where(p => p.Category.Id == id).ToList();
+            
+            if (product != null)
+            {
+                ModelState.AddModelError(string.Empty,"You can not delete this");
+            }
+
+            if (ModelState.IsValid)
+            {
+                db.Categories.Remove(category);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            return View(category);
         }
 
         protected override void Dispose(bool disposing)
